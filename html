@@ -1981,6 +1981,18 @@
             if (savedNotes) {
                 document.getElementById('student-notes').value = savedNotes;
             }
+
+            // Safeguard: ensure at least one page/tab is active to avoid blank render on some hosts
+            if (!document.querySelector('.page.active')) {
+                const loginPage = document.getElementById('page-login');
+                if (loginPage) {
+                    loginPage.classList.add('active');
+                }
+            }
+
+            if (typeof updateNavigationVisibility === 'function') {
+                updateNavigationVisibility();
+            }
         });
 
         // Clock Logic

@@ -1,1 +1,2000 @@
-# Studyflow
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple Impact | Full Prototype</title>
+    <style>
+        /* --- CSS STYLING & MOBILE UI --- */
+        :root {
+            --phone-shell: #1a1a1a;
+            --screen-bg: #f1f5f9;
+            --primary: #3b82f6;
+            --math-color: #FF6B6B;
+            --science-color: #10b981;
+            --art-color: #f59e0b;
+            --text-dark: #1e293b;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-secondary: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #e2e8f0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; flex-direction: column;
+        }
+
+        /* Smartphone Shell */
+        .phone-model {
+            width: 300px; height: 680px; background: var(--phone-shell);
+            border-radius: 40px; padding: 10px; position: relative; border: 4px solid #333;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .screen-content {
+            width: 100%; height: 100%; background: var(--screen-bg);
+            border-radius: 35px; overflow: hidden; position: relative;
+        }
+
+        /* Page Management */
+        .page {
+            width: 100%; height: calc(100% - 65px);
+            position: absolute; top: 0; left: 0;
+            display: none; flex-direction: column; overflow-y: auto;
+        }
+        .page.active { display: flex; }
+
+        /* 1. LOGIN PAGE (Inside Phone) */
+        #page-login {
+            height: 100%; background: linear-gradient(135deg, #3b82f6 0%, #1e293b 100%);
+            justify-content: center; align-items: center; color: white; z-index: 100;
+        }
+        .login-box { width: 80%; text-align: center; }
+        .login-box input {
+            width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px;
+            border: none; outline: none; box-sizing: border-box;
+        }
+        .login-btn {
+            width: 100%; padding: 12px; background: white; color: var(--primary);
+            border: none; border-radius: 25px; font-weight: bold; margin-top: 15px; cursor: pointer;
+        }
+
+        /* Image Placeholders */
+        .img-placeholder {
+            background: #e2e8f0; border: 2px dashed #cbd5e1;
+            display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; font-size: 0.7em; font-weight: bold; text-align: center;
+        }
+
+        /* Headers & Headers */
+        .view-header {
+            padding: 40px 20px 15px; background: white; text-align: center;
+            font-weight: bold; border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 10;
+        }
+
+        /* Components */
+        .search-bar { padding: 10px 15px; }
+        .search-input { width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ddd; font-size: 0.8em; }
+
+        .circle-progress {
+            width: 85px; height: 85px; border: 8px solid var(--primary);
+            border-radius: 50%; margin: 15px auto; display: flex;
+            align-items: center; justify-content: center; font-weight: bold;
+            background: white; cursor: pointer; font-size: 1.2em;
+        }
+
+        /* Skill Tree & Certs */
+        .skill-tree-container {
+            padding: 20px; background: #f8fafc; min-height: 280px; position: relative; overflow: hidden;
+            border-radius: 12px; margin: 0 15px;
+        }
+        .skill-tree {
+            position: relative; width: 100%; height: 100%;
+        }
+        .skill-node {
+            background: var(--card-bg); border: 2px solid #e2e8f0; padding: 0;
+            border-radius: 50%;
+            text-align: center; font-size: 0.8em; cursor: pointer;
+            width: 55px; height: 55px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; position: absolute; z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+        .skill-node.active { 
+            border-color: var(--primary); background: var(--primary); color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .skill-node.locked {
+            border-color: #e2e8f0; background: #f8fafc; color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .skill-progress {
+            position: absolute; bottom: -2px; right: -2px; background: var(--science-color);
+            color: white; border-radius: 50%; width: 16px; height: 16px;
+            display: flex; align-items: center; justify-content: center; font-size: 0.5em;
+            font-weight: bold; border: 2px solid white;
+        }
+        .skill-label {
+            position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+            font-size: 0.55em; color: var(--text-secondary); white-space: nowrap; width: 70px;
+            font-weight: 500;
+        }
+        .skill-connector {
+            position: absolute; background: #cbd5e1; z-index: 1; height: 1.5px;
+            transform-origin: 0 0;
+        }
+
+        .cert-row { display: flex; overflow-x: auto; padding: 15px 20px; gap: 20px; }
+        .cert-item { min-width: 80px; text-align: center; cursor: pointer; }
+        .cert-img { 
+            width: 70px; height: 70px; border-radius: 12px; margin-bottom: 8px;
+            background: var(--card-bg); border: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .cert-item span {
+            font-size: 0.65em; color: var(--text-dark); font-weight: 500;
+        }
+
+        .peer-review {
+            margin: 20px 15px; padding: 16px; background: var(--card-bg);
+            border-radius: 12px; border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .peer-review p {
+            font-size: 0.75em; margin: 0; color: var(--text-dark);
+        }
+        .peer-review strong {
+            color: var(--primary);
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: absolute; bottom: 0; width: 100%; height: 65px;
+            background: white; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; align-items: center;
+        }
+        .nav-item { cursor: pointer; font-size: 0.7em; color: #94a3b8; font-weight: bold; text-align: center; }
+        .nav-item.active { color: var(--primary); }
+
+        /* Feedback Screen */
+        .no-data-screen {
+            padding: 40px 20px; text-align: center; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        /* Profile Tab - Top Right */
+        .profile-tab {
+            position: absolute;
+            top: 43px;
+            right: 20px;
+            background: transparent;
+            border-radius: 18px;
+            padding: 4px 10px 4px 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-tab:hover {
+            transform: translateY(-1px);
+        }
+        
+        .profile-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .profile-name {
+            font-size: 0.6em;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1;
+        }
+        
+        .profile-status {
+            font-size: 0.5em;
+            color: #10b981;
+            line-height: 1;
+            margin-top: 1px;
+        }
+        
+        /* Grade Selection Styles */
+        .grade-selection {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100% - 65px);
+        }
+
+        .grade-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .grade-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .grade-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+        }
+
+        .grade-info {
+            flex: 1;
+        }
+
+        .grade-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin: 0 0 5px 0;
+        }
+
+        .grade-description {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .grade-features {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .feature-item {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .feature-bullet {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        /* Hide profile tab on login and grade selection pages */
+        #page-login.active + .profile-tab,
+        #page-login.active ~ .profile-tab,
+        #page-grade-selection.active + .profile-tab,
+        #page-grade-selection.active ~ .profile-tab {
+            display: none;
+        }
+        
+        /* Show profile tab on all other pages */
+        #page-dash.active ~ .profile-tab,
+        #page-growth.active ~ .profile-tab,
+        #page-prof.active ~ .profile-tab,
+        #page-progress.active ~ .profile-tab,
+        #page-flashcards.active ~ .profile-tab,
+        #page-course.active ~ .profile-tab,
+        #page-lessons.active ~ .profile-tab,
+        #page-no-cert.active ~ .profile-tab,
+        #page-flashcards-enhanced.active ~ .profile-tab {
+            display: flex;
+        }
+        
+        /* Hide bottom nav on grade selection page */
+        #page-grade-selection.active ~ .nav-bar,
+        #page-grade-selection.active + .nav-bar {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-model">
+        <div class="screen-content">
+            <!-- Profile Tab - Top Right -->
+            <div class="profile-tab" onclick="go('page-prof')" id="profile-tab-element" style="display: none;">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <div class="profile-name" style="display: none;"></div>
+                    <div class="profile-status">
+                        <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="page-login" class="page active">
+                <div class="login-box">
+                    <svg width="80" height="80" viewBox="0 0 80 80" style="margin: 0 auto 15px; display: block;" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background Circle -->
+                    <circle cx="40" cy="40" r="38" fill="#3b82f6" stroke="white" stroke-width="2"/>
+                    
+                    <!-- Book with Pages -->
+                    <g transform="translate(40, 40)">
+                        <!-- Book Base -->
+                        <rect x="-18" y="-12" width="36" height="24" fill="#1e293b" rx="2"/>
+                        <!-- Book Spine -->
+                        <rect x="-18" y="-12" width="3" height="24" fill="#374151"/>
+                        <!-- Pages -->
+                        <rect x="-15" y="-10" width="30" height="20" fill="#f8fafc" rx="1"/>
+                        <!-- Page Lines -->
+                        <line x1="-10" y1="-6" x2="10" y2="-6" stroke="#cbd5e1" stroke-width="1"/>
+                        <line x1="-10" y1="-2" x2="10" y2="-2" stroke="#cbd5e1" stroke-width="1"/>
+                        <line x1="-10" y1="2" x2="10" y2="2" stroke="#cbd5e1" stroke-width="1"/>
+                        <line x1="-10" y1="6" x2="10" y2="6" stroke="#cbd5e1" stroke-width="1"/>
+                        <!-- Bookmark -->
+                        <rect x="12" y="-10" width="2" height="8" fill="#ef4444" rx="1"/>
+                    </g>
+                </svg>
+                    <h2 style="margin: 0;">Study Flow</h2>
+                    <p style="font-size: 0.8em; margin-bottom: 20px; opacity: 0.8;">Quality Education Portal</p>
+                    <input type="text" id="uIn" placeholder="Student Username">
+                    <input type="password" id="passwordInput" placeholder="Password">
+                    <button class="login-btn" onclick="login()">Login</button>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="#" onclick="showForgotPassword()" style="color: white; font-size: 0.7em; text-decoration: underline; opacity: 0.8;">Forgot Password?</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forgot Password Modal -->
+            <div id="forgotPasswordModal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; border-radius: 35px;">
+                <div style="background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 280px; text-align: center;">
+                    <h3 style="margin: 0 0 15px 0; color: #1e293b; font-size: 1.2em;">Reset Password</h3>
+                    <p style="margin: 0 0 20px 0; color: #64748b; font-size: 0.8em;">Enter your email address and we'll send you a link to reset your password.</p>
+                    <input type="email" id="resetEmail" placeholder="Enter your email" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9em;">
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="closeForgotPassword()" style="flex: 1; padding: 12px; background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Cancel</button>
+                        <button onclick="sendResetLink()" style="flex: 1; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Send Link</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Selection Page -->
+            <div id="page-grade-selection" class="page">
+                <div class="view-header">Select Your Grade Level</div>
+                <div class="grade-selection">
+                    <!-- Elementary School -->
+                    <div class="grade-card" onclick="selectGrade('elementary')">
+                        <div class="grade-icon">🎒</div>
+                        <div class="grade-info">
+                            <h3 class="grade-title">Elementary School</h3>
+                            <p class="grade-description">Grades K-5: Foundational learning with fun activities and basic concepts.</p>
+                            <div class="grade-features">
+                                <div class="feature-item"><span class="feature-bullet">•</span> Basic Math & Reading</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Science Exploration</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Creative Activities</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle School -->
+                    <div class="grade-card" onclick="selectGrade('middle')">
+                        <div class="grade-icon">📚</div>
+                        <div class="grade-info">
+                            <h3 class="grade-title">Middle School</h3>
+                            <p class="grade-description">Grades 6-8: Intermediate concepts and subject exploration.</p>
+                            <div class="grade-features">
+                                <div class="feature-item"><span class="feature-bullet">•</span> Advanced Mathematics</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Science Labs</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Social Studies</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High School -->
+                    <div class="grade-card" onclick="selectGrade('high')">
+                        <div class="grade-icon">🎓</div>
+                        <div class="grade-info">
+                            <h3 class="grade-title">High School</h3>
+                            <p class="grade-description">Grades 9-12: Advanced subjects and college preparation.</p>
+                            <div class="grade-features">
+                                <div class="feature-item"><span class="feature-bullet">•</span> AP Courses</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Test Preparation</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Career Planning</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- College -->
+                    <div class="grade-card" onclick="selectGrade('college')">
+                        <div class="grade-icon">🎓</div>
+                        <div class="grade-info">
+                            <h3 class="grade-title">College</h3>
+                            <p class="grade-description">University Level: Professional development and specialized knowledge.</p>
+                            <div class="grade-features">
+                                <div class="feature-item"><span class="feature-bullet">•</span> Advanced Studies</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Research Skills</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Career Development</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adult Learning -->
+                    <div class="grade-card" onclick="selectGrade('adult')">
+                        <div class="grade-icon">💼</div>
+                        <div class="grade-info">
+                            <h3 class="grade-title">Adult Learning</h3>
+                            <p class="grade-description">Professional Development: Career skills and continuous education.</p>
+                            <div class="grade-features">
+                                <div class="feature-item"><span class="feature-bullet">•</span> Professional Skills</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Certification Prep</div>
+                                <div class="feature-item"><span class="feature-bullet">•</span> Industry Training</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-math" class="page">
+                <div class="view-header">Mathematics</div>
+                <div style="padding: 15px; height: calc(100% - 65px); overflow-y: auto;">
+                    <!-- Subject Header -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px; color: white; text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 10px;">📐</div>
+                        <h2 style="margin: 0; font-size: 1.2em; font-weight: bold;">Mathematics</h2>
+                        <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Study notes and materials</p>
+                    </div>
+
+                    <!-- Study Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Algebra Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('math-algebra')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">📊</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Algebra</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Equations and expressions</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="math-algebra" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Key Concepts:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>Linear equations: ax + b = 0</li>
+                                        <li>Quadratic formula: x = (-b ± √(b²-4ac))/2a</li>
+                                        <li>Factoring: Find common factors</li>
+                                        <li>Variables and constants</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #667eea;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">💡 Remember: Always check your solutions by plugging them back into the original equation!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Geometry Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('math-geometry')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">📐</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Geometry</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Shapes and measurements</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="math-geometry" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Key Formulas:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>Area of circle: πr²</li>
+                                        <li>Pythagorean theorem: a² + b² = c²</li>
+                                        <li>Area of triangle: ½ × base × height</li>
+                                        <li>Circumference: 2πr</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #667eea;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">📐 Practice: Draw different shapes and calculate their areas to reinforce these concepts!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculus Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('math-calculus')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #dcfce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">📈</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Calculus</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Rates of change</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="math-calculus" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Derivatives:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>Power rule: d/dx(xⁿ) = nxⁿ⁻¹</li>
+                                        <li>Product rule: (uv)' = u'v + uv'</li>
+                                        <li>Chain rule: (f(g(x)))' = f'(g(x)) × g'(x)</li>
+                                        <li>Derivative of sin(x) = cos(x)</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #667eea;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">🔍 Tip: Practice finding derivatives of simple functions before moving to complex ones!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-science" class="page">
+                <div class="view-header">Science</div>
+                <div style="padding: 15px; height: calc(100% - 65px); overflow-y: auto;">
+                    <!-- Subject Header -->
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px; color: white; text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 10px;">🔬</div>
+                        <h2 style="margin: 0; font-size: 1.2em; font-weight: bold;">Science</h2>
+                        <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Explore scientific concepts</p>
+                    </div>
+
+                    <!-- Study Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Chemistry Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('science-chemistry')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">⚗️</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Chemistry</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Elements and compounds</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="science-chemistry" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Periodic Table Basics:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>Atomic number = number of protons</li>
+                                        <li>Atomic mass = protons + neutrons</li>
+                                        <li>Groups share similar properties</li>
+                                        <li>Periods indicate electron shells</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #10b981;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">⚗️ Remember: H (Hydrogen) is the most abundant element in the universe!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Physics Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('science-physics')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">⚡</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Physics</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Forces and motion</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="science-physics" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Newton's Laws:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>1st Law: Object at rest stays at rest</li>
+                                        <li>2nd Law: F = ma (Force = mass × acceleration)</li>
+                                        <li>3rd Law: For every action, equal and opposite reaction</li>
+                                        <li>Gravity: F = G(m₁m₂)/r²</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #10b981;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">⚡ Think: Every time you throw a ball, you're demonstrating Newton's laws!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Biology Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('science-biology')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #dcfce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">🧬</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Biology</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Living organisms</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="science-biology" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Cell Structure:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>Nucleus: Contains DNA and controls cell</li>
+                                        <li>Mitochondria: Powerhouse of the cell</li>
+                                        <li>Cell membrane: Controls what enters/exits</li>
+                                        <li>Cytoplasm: Gel-like substance inside cell</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #10b981;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">🧬 Fact: Humans have about 37 trillion cells in their bodies!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-history" class="page">
+                <div class="view-header">History</div>
+                <div style="padding: 15px; height: calc(100% - 65px); overflow-y: auto;">
+                    <!-- Subject Header -->
+                    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px; color: white; text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 10px;">📚</div>
+                        <h2 style="margin: 0; font-size: 1.2em; font-weight: bold;">History</h2>
+                        <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Learn from the past</p>
+                    </div>
+
+                    <!-- Study Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- World Wars Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('history-wars')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">⚔️</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">World Wars</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Global conflicts</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="history-wars" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Key Events:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>WWI: 1914-1918 (Archduke assassination)</li>
+                                        <li>WWII: 1939-1945 (Hitler's invasion of Poland)</li>
+                                        <li>Cold War: 1947-1991 (US vs Soviet Union)</li>
+                                        <li>Treaty of Versailles ended WWI</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #f59e0b;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">⚔️ Remember: Understanding history helps us avoid repeating past mistakes!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ancient Civilizations Card -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleCard('history-ancient')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #dcfce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">🏛️</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Ancient Civilizations</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Early societies</p>
+                                    </div>
+                                </div>
+                                <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                            </div>
+                            <div id="history-ancient" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                                    <h5 style="margin: 0 0 10px 0; font-size: 0.8em; font-weight: bold; color: #1e293b;">Major Civilizations:</h5>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.7em; color: #64748b; line-height: 1.4;">
+                                        <li>Egypt: Pyramids, hieroglyphics (3100 BCE)</li>
+                                        <li>Greece: Democracy, philosophy (800 BCE)</li>
+                                        <li>Rome: Empire, aqueducts (753 BCE)</li>
+                                        <li>China: Great Wall, inventions (2070 BCE)</li>
+                                    </ul>
+                                    <div style="margin-top: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #f59e0b;">
+                                        <p style="margin: 0; font-size: 0.65em; color: #1e293b;">🏛️ Fun: Many ancient inventions we still use today!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-dash" class="page">
+                <div class="view-header">Dashboard</div>
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="🔍 Search subjects...">
+                </div>
+                <div style="text-align: center; padding: 10px;">
+                    <p id="clock" style="font-size: 2.5em; font-weight: bold; margin: 0;">10:09 AM</p>
+                    <p style="font-size: 0.8em; color: #64748b; margin: 0;">WEDNESDAY, OCT 25</p>
+                </div>
+                
+                <div class="circle-progress" id="dash-circle" onclick="updateGoal()">60%</div>
+                <p style="text-align: center; font-size: 0.75em; color: #64748b;">Today's Goal Progress</p>
+
+                <!-- Continue Learning Section -->
+                <div style="padding: 15px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0; font-size: 1em; font-weight: bold;">Continue Learning</h3>
+                        <span style="font-size: 0.7em; color: #64748b;">See all</span>
+                    </div>
+                    <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="background: #f0f7ff; width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="openVideo()">
+                                <span style="font-size: 1.5em;">📹</span>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Physics 101: Kinematics</h4>
+                                <p style="margin: 5px 0 0; font-size: 0.7em; color: #64748b;">Continue where you left off</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Section -->
+                <div style="padding: 15px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0; font-size: 1em; font-weight: bold;">My Courses</h3>
+                        <span style="font-size: 0.7em; color: #64748b;">View all</span>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 15px; color: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="go('page-course')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Introduction to Psychology</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; opacity: 0.9;">PSYC 101 • 65% Complete</p>
+                            </div>
+                            <div style="font-size: 1.5em;">🧠</div>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <div style="background: rgba(255,255,255,0.3); height: 4px; border-radius: 2px; overflow: hidden;">
+                                <div style="background: white; height: 100%; width: 65%; border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 15px;">
+                    <div class="img-placeholder" style="width: 100%; height: 100px; border-radius: 15px;">[Insert Course/Banner Image]</div>
+                    <p style="font-weight: bold; font-size: 0.85em; margin-top: 10px;">Physics 101: Kinematics</p>
+                </div>
+
+                <!-- Quick Study Section -->
+                <div style="padding: 15px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0; font-size: 1em; font-weight: bold;">Quick Study</h3>
+                        <span style="font-size: 0.7em; color: #64748b;">See all</span>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="startFlashcards('math')">
+                            <div style="font-size: 2.5em; margin-bottom: 10px;">📐</div>
+                            <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Mathematics</h4>
+                            <p style="margin: 5px 0 0; font-size: 0.6em; color: #64748b;">25 cards</p>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="startFlashcards('science')">
+                            <div style="font-size: 2.5em; margin-bottom: 10px;">🔬</div>
+                            <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Science</h4>
+                            <p style="margin: 5px 0 0; font-size: 0.6em; color: #64748b;">18 cards</p>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="startFlashcards('history')">
+                            <div style="font-size: 2.5em; margin-bottom: 10px;">📚</div>
+                            <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">History</h4>
+                            <p style="margin: 5px 0 0; font-size: 0.6em; color: #64748b;">32 cards</p>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="startFlashcards('english')">
+                            <div style="font-size: 2.5em; margin-bottom: 10px;">📝</div>
+                            <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">English</h4>
+                            <p style="margin: 5px 0 0; font-size: 0.6em; color: #64748b;">21 cards</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-progress" class="page">
+                <div class="view-header">Subject Progress</div>
+                <div style="padding: 20px;">
+                    <!-- Subject Header -->
+                    <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                            <div id="subject-icon" style="font-size: 2.5em;">📐</div>
+                            <div>
+                                <h2 id="subject-name" style="margin: 0; font-size: 1.3em; font-weight: bold;">Algebra</h2>
+                                <p id="subject-description" style="margin: 5px 0 0; font-size: 0.7em; color: #64748b;">Mathematics Fundamentals</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 0.8em; font-weight: bold;">Overall Progress</span>
+                                <span id="progress-percentage" style="font-size: 0.8em; font-weight: bold; color: var(--primary);">100%</span>
+                            </div>
+                            <div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="progress-bar" style="background: var(--primary); height: 100%; width: 100%; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievements -->
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; font-weight: bold;">Achievements</h3>
+                    <div style="display: grid; gap: 10px;">
+                        <div style="background: white; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size: 1.8em;">🏆</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Master Mathematician</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Completed all algebra modules</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size: 1.8em;">⭐</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Quick Learner</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">Finished in record time</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size: 1.8em;">🎯</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Perfect Score</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">100% on all assessments</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <h3 style="margin: 20px 0 15px 0; font-size: 1.1em; font-weight: bold;">Recent Activity</h3>
+                    <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 8px; height: 8px; background: var(--science-color); border-radius: 50%;"></div>
+                                <span style="font-size: 0.7em;">Completed Quadratic Equations</span>
+                                <span style="font-size: 0.6em; color: #64748b; margin-left: auto;">2 days ago</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 8px; height: 8px; background: var(--science-color); border-radius: 50%;"></div>
+                                <span style="font-size: 0.7em;">Mastered Linear Functions</span>
+                                <span style="font-size: 0.6em; color: #64748b; margin-left: auto;">5 days ago</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 8px; height: 8px; background: var(--science-color); border-radius: 50%;"></div>
+                                <span style="font-size: 0.7em;">Started Algebra Basics</span>
+                                <span style="font-size: 0.6em; color: #64748b; margin-left: auto;">1 week ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Back Button -->
+                    <button onclick="go('page-growth', 'n-growth')" style="margin-top: 20px; width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 1.2em;">🌳</span>
+                        <span>Back</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="page-prof" class="page">
+                <div class="view-header">Settings</div>
+                <div style="text-align: center; padding: 30px 20px;">
+                    <button onclick="go('page-dash')" style="width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 15px; background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 1.5em; color: #3b82f6; border: 2px solid #93c5fd; cursor: pointer;">👤</button>
+                    <h3 id="display-name" style="margin: 0;">Student User</h3>
+                    <p style="font-size: 0.8em; color: #64748b;">Member since 2023</p>
+
+                    <div style="margin-top: 30px; text-align: left;">
+                        <label style="font-size: 0.7em; font-weight: bold; color: var(--primary);">Edit Name</label>
+                        <input type="text" id="name-edit" value="Student User" style="width: 100%; border: none; border-bottom: 1px solid #ddd; padding: 5px 0;" onkeyup="syncName()">
+                    </div>
+
+                    <button onclick="logout()" style="margin-top: 50px; background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer;">Logout</button>
+                </div>
+            </div>
+
+            <div id="page-growth" class="page">
+                <div class="view-header">Growth Hub</div>
+                <p style="padding: 15px 20px 0; font-weight: bold; font-size: 0.9em;">Skill Tree</p>
+                <div class="skill-tree-container">
+                    <div class="skill-tree">
+                        <!-- Constellation Layout - Organic positioning within phone bounds -->
+                        <div class="skill-node active" style="top: 20px; left: 50px;" onclick="showProgress('algebra', '📐', 'Mathematics Fundamentals', 100)">
+                            <span>📐</span>
+                            <div class="skill-progress">100%</div>
+                            <div class="skill-label">Algebra</div>
+                        </div>
+                        
+                        <div class="skill-node active" style="top: 50px; left: 150px;" onclick="showProgress('statistics', '📊', 'Data Analysis & Probability', 75)">
+                            <span>📊</span>
+                            <div class="skill-progress">75%</div>
+                            <div class="skill-label">Statistics</div>
+                        </div>
+                        
+                        <div class="skill-node" style="top: 120px; left: 30px;" onclick="showProgress('calculus', '📈', 'Advanced Mathematics', 50)">
+                            <span>📈</span>
+                            <div class="skill-progress">50%</div>
+                            <div class="skill-label">Calculus</div>
+                        </div>
+                        
+                        <div class="skill-node locked" style="top: 140px; left: 120px;" onclick="showProgress('physics', '🔒', 'Physical Sciences', 0)">
+                            <span>🔒</span>
+                            <div class="skill-label">Physics</div>
+                        </div>
+                        
+                        <div class="skill-node locked" style="top: 200px; left: 60px;" onclick="showProgress('quantum', '🔒', 'Quantum Mechanics', 0)">
+                            <span>🔒</span>
+                            <div class="skill-label">Quantum</div>
+                        </div>
+                        
+                        <div class="skill-node locked" style="top: 220px; left: 160px;" onclick="showProgress('research', '🔒', 'Research Methods', 0)">
+                            <span>🔒</span>
+                            <div class="skill-label">Research</div>
+                        </div>
+                        
+                        <!-- Constellation connectors -->
+                        <div class="skill-connector" style="top: 50px; left: 80px; width: 70px; transform: rotate(25deg);"></div>
+                        <div class="skill-connector" style="top: 80px; left: 80px; width: 40px; transform: rotate(70deg);"></div>
+                        <div class="skill-connector" style="top: 150px; left: 60px; width: 60px; transform: rotate(15deg);"></div>
+                        <div class="skill-connector" style="top: 160px; left: 150px; width: 30px; transform: rotate(70deg);"></div>
+                        <div class="skill-connector" style="top: 180px; left: 80px; width: 80px; transform: rotate(25deg);"></div>
+                    </div>
+                </div>
+
+                <p style="padding: 10px 20px 0; font-weight: bold; font-size: 0.9em;">Peer Review</p>
+                <div class="peer-review">
+                    <p><strong>Ms. Davis:</strong> "Great job on the essay!"</p>
+                </div>
+            </div>
+
+            <div id="page-flashcards-enhanced" class="page">
+                <div class="view-header">Flashcards</div>
+                <div style="padding: 15px; height: calc(100% - 65px); overflow-y: auto;">
+                    <!-- Subject Tabs -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+                        <div style="min-width: 80px; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; color: white; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold;" onclick="showFlashcards('math')">
+                            📐 Math
+                        </div>
+                        <div style="min-width: 80px; padding: 8px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 20px; color: white; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold;" onclick="showFlashcards('science')">
+                            🔬 Science
+                        </div>
+                        <div style="min-width: 80px; padding: 8px 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 20px; color: white; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold;" onclick="showFlashcards('history')">
+                            📚 History
+                        </div>
+                        <div style="min-width: 80px; padding: 8px 16px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 20px; color: white; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold;" onclick="showFlashcards('english')">
+                            📝 English
+                        </div>
+                    </div>
+
+                    <!-- Math Flashcards -->
+                    <div id="math-flashcards" style="display: none;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 15px; margin-bottom: 20px; color: white; text-align: center;">
+                            <h3 style="margin: 0; font-size: 1.1em;">Mathematics Flashcards</h3>
+                            <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Master equations, formulas, and problem-solving</p>
+                        </div>
+                        
+                        <!-- Flashcard Container -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-size: 0.8em; color: #64748b;">Card <span id="math-card-number">1</span> of 5</span>
+                            </div>
+                            
+                            <!-- Card 1: Algebra -->
+                            <div id="math-card-1" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('math-card-1')">
+                                <div id="math-card-1-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Solve for x:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.5em; font-weight: bold; color: #667eea;">2x + 5 = 13</p>
+                                </div>
+                                <div id="math-card-1-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #059669;">Solution:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1.2em; color: #1e293b;">2x + 5 = 13</p>
+                                    <p style="margin: 5px 0 0; font-size: 1.1em; color: #64748b;">2x = 13 - 5</p>
+                                    <p style="margin: 5px 0 0; font-size: 1.1em; color: #64748b;">2x = 8</p>
+                                    <p style="margin: 5px 0 0; font-size: 1.3em; font-weight: bold; color: #10b981;">x = 4</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Geometry -->
+                            <div id="math-card-2" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('math-card-2')">
+                                <div id="math-card-2-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Pythagorean Theorem:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #667eea;">a² + b² = c²</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What does this formula calculate?</p>
+                                </div>
+                                <div id="math-card-2-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #059669;">Right Triangle Hypotenuse</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Calculates the length of the hypotenuse</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• a and b are the shorter sides</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• c is the longest side (hypotenuse)</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Only works for right triangles</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Fractions -->
+                            <div id="math-card-3" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('math-card-3')">
+                                <div id="math-card-3-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Fraction Addition:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #667eea;">¾ + ⅓ = ?</p>
+                                </div>
+                                <div id="math-card-3-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #059669;">Solution:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1.2em; color: #1e293b;">¾ + ⅓ = 13/12 = 1 1/12</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">• Find common denominator: 12</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Convert: ¾ = 9/12, ⅓ = 4/12</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Add: 9/12 + 4/12 = 13/12</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 4: Percentages -->
+                            <div id="math-card-4" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('math-card-4')">
+                                <div id="math-card-4-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Percentage Problem:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.2em; font-weight: bold; color: #667eea;">What is 25% of 80?</p>
+                                </div>
+                                <div id="math-card-4-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #059669;">Solution:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1.2em; color: #1e293b;">25% of 80 = 20</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">• Convert percentage to decimal: 0.25</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Multiply: 0.25 × 80 = 20</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Alternative: 80 ÷ 4 = 20</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 5: Order of Operations -->
+                            <div id="math-card-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('math-card-5')">
+                                <div id="math-card-5-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Order of Operations:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #667eea;">PEMDAS</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What does each letter stand for?</p>
+                                </div>
+                                <div id="math-card-5-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #059669;">Mathematical Order:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>P</strong> - Parentheses</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;"><strong>E</strong> - Exponents</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;"><strong>M</strong> - Multiplication</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;"><strong>D</strong> - Division</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;"><strong>A</strong> - Addition</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;"><strong>S</strong> - Subtraction</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Navigation -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                                <button onclick="previousCard('math')" style="padding: 4px 8px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Previous</button>
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick="markKnown('math')" style="padding: 4px 8px; background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #166534;">Know</button>
+                                    <button onclick="markUnknown('math')" style="padding: 4px 8px; background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #991b1b;">Unknown</button>
+                                </div>
+                                <button onclick="nextCard('math')" style="padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Next</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Science Flashcards -->
+                    <div id="science-flashcards" style="display: none;">
+                        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 15px; padding: 15px; margin-bottom: 20px; color: white; text-align: center;">
+                            <h3 style="margin: 0; font-size: 1.1em;">Science Flashcards</h3>
+                            <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Explore chemistry, physics, and biology concepts</p>
+                        </div>
+                        
+                        <!-- Flashcard Container -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-size: 0.8em; color: #64748b;">Card <span id="science-card-number">1</span> of 6</span>
+                            </div>
+                            
+                            <!-- Card 1: Water Molecule -->
+                            <div id="science-card-1" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="flipCard('science-card-1')">
+                                <div id="science-card-1-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Chemical Formula:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.5em; font-weight: bold; color: #059669;">H₂O</p>
+                                </div>
+                                <div id="science-card-1-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #166534;">Water Molecule</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Chemical Name: Water</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• 2 Hydrogen atoms + 1 Oxygen atom</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Essential for life on Earth</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Boiling point: 100°C, Freezing: 0°C</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Photosynthesis (Hidden by default) -->
+                            <div id="science-card-2" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="flipCard('science-card-2')">
+                                <div id="science-card-2-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Photosynthesis Equation:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.2em; font-weight: bold; color: #059669;">6CO₂ + 6H₂O → ?</p>
+                                </div>
+                                <div id="science-card-2-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #166534;">Complete Equation:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1.1em; color: #1e293b;">6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Reactants: Carbon dioxide + Water</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Products: Glucose + Oxygen</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Occurs in plant chloroplasts</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Newton's Laws (Hidden by default) -->
+                            <div id="science-card-3" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="flipCard('science-card-3')">
+                                <div id="science-card-3-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Newton's First Law:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.1em; font-weight: bold; color: #059669;">Law of Inertia</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What does it state?</p>
+                                </div>
+                                <div id="science-card-3-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #166534;">Inertia Definition:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">"An object at rest stays at rest, and an object in motion stays in motion unless acted upon by an external force."</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Objects resist changes in motion</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Mass determines inertia</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Foundation of classical mechanics</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 4: Cell Structure (Hidden by default) -->
+                            <div id="science-card-4" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="flipCard('science-card-4')">
+                                <div id="science-card-4-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Cell Organelle:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #059669;">Mitochondria</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What is its function?</p>
+                                </div>
+                                <div id="science-card-4-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #166534;">Powerhouse of the Cell</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Produces ATP (cellular energy)</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Site of cellular respiration</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Has its own DNA</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Found in most eukaryotic cells</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 5: Periodic Table (Hidden by default) -->
+                            <div id="science-card-5" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="flipCard('science-card-5')">
+                                <div id="science-card-5-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Periodic Table:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #059669;">Au</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What element is this?</p>
+                                </div>
+                                <div id="science-card-5-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #166534;">Gold</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Atomic Number: 79</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Atomic Mass: 196.97 u</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Group: 11 (Transition metals)</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Properties: Malleable, ductile, conductive</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 6: Speed of Light (Hidden by default) -->
+                            <div id="science-card-6" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="flipCard('science-card-6')">
+                                <div id="science-card-6-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Physics Constant:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.2em; font-weight: bold; color: #059669;">Speed of Light</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What is its value?</p>
+                                </div>
+                                <div id="science-card-6-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #166534;">Universal Constant</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1.2em; color: #1e293b;">c = 299,792,458 m/s</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Approximately 3.0 × 10⁸ m/s</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Maximum speed in the universe</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Fundamental constant in physics</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Navigation -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                                <button onclick="previousCard('science')" style="padding: 4px 8px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Previous</button>
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick="markKnown('science')" style="padding: 4px 8px; background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #166534;">Know</button>
+                                    <button onclick="markUnknown('science')" style="padding: 4px 8px; background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #991b1b;">Unknown</button>
+                                </div>
+                                <button onclick="nextCard('science')" style="padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Next</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Flashcards -->
+                    <div id="history-flashcards" style="display: none;">
+                        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 15px; padding: 15px; margin-bottom: 20px; color: white; text-align: center;">
+                            <h3 style="margin: 0; font-size: 1.1em;">History Flashcards</h3>
+                            <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Journey through important historical events</p>
+                        </div>
+                        
+                        <!-- Flashcard Container -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-size: 0.8em; color: #64748b;">Card <span id="history-card-number">1</span> of 4</span>
+                            </div>
+                            
+                            <!-- Card 1: World War II -->
+                            <div id="history-card-1" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('history-card-1')">
+                                <div id="history-card-1-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Historical Event:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #d97706;">World War II</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">When did it begin?</p>
+                                </div>
+                                <div id="history-card-1-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #92400e;">September 1, 1939</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Germany invaded Poland</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Britain and France declared war</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Started global conflict</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Ended in 1945 after 6 years</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: American Revolution (Hidden by default) -->
+                            <div id="history-card-2" style="display: none; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('history-card-2')">
+                                <div id="history-card-2-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">American Revolution:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.2em; font-weight: bold; color: #d97706;">Declaration of Independence</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">What year was it signed?</p>
+                                </div>
+                                <div id="history-card-2-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #92400e;">July 4, 1776</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Thirteen colonies declared independence</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Written primarily by Thomas Jefferson</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• "All men are created equal"</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Started the Revolutionary War</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Ancient Egypt (Hidden by default) -->
+                            <div id="history-card-3" style="display: none; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('history-card-3')">
+                                <div id="history-card-3-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Ancient Wonder:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #d97706;">Great Pyramid of Giza</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">Who built it?</p>
+                                </div>
+                                <div id="history-card-3-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #92400e;">Pharaoh Khufu</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Built around 2560 BCE</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Largest of the three pyramids</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Originally 146.5 meters tall</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Only surviving ancient wonder</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 4: Renaissance (Hidden by default) -->
+                            <div id="history-card-4" style="display: none; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('history-card-4')">
+                                <div id="history-card-4-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Renaissance Period:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.2em; font-weight: bold; color: #d97706;">Leonardo da Vinci</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">Famous painting?</p>
+                                </div>
+                                <div id="history-card-4-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #92400e;">Mona Lisa</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Painted between 1503-1519</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Famous for her enigmatic smile</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Housed in Louvre Museum, Paris</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Masterpiece of Renaissance art</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Navigation -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                                <button onclick="previousCard('history')" style="padding: 4px 8px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Previous</button>
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick="markKnown('history')" style="padding: 4px 8px; background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #166534;">Know</button>
+                                    <button onclick="markUnknown('history')" style="padding: 4px 8px; background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #991b1b;">Unknown</button>
+                                </div>
+                                <button onclick="nextCard('history')" style="padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Next</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- English Flashcards -->
+                    <div id="english-flashcards" style="display: none;">
+                        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 15px; padding: 15px; margin-bottom: 20px; color: white; text-align: center;">
+                            <h3 style="margin: 0; font-size: 1.1em;">English Flashcards</h3>
+                            <p style="margin: 5px 0 0; font-size: 0.8em; opacity: 0.9;">Master vocabulary, grammar, and literature</p>
+                        </div>
+                        
+                        <!-- Flashcard Container -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-size: 0.8em; color: #64748b;">Card <span id="english-card-number">1</span> of 5</span>
+                            </div>
+                            
+                            <!-- Card 1: Metaphor -->
+                            <div id="english-card-1" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('english-card-1')">
+                                <div id="english-card-1-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Literary Term:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #dc2626;">Metaphor</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">What does it mean?</p>
+                                </div>
+                                <div id="english-card-1-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #991b1b;">Definition:</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">A figure of speech in which a word or phrase is applied to an object or action to which it is not literally applicable</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Example:</strong> "Time is a thief" - time doesn't literally steal things</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Usage:</strong> Common in poetry and literature to create vivid imagery</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Simile (Hidden by default) -->
+                            <div id="english-card-2" style="display: none; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('english-card-2')">
+                                <div id="english-card-2-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Literary Device:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #dc2626;">Simile</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">What makes it different from metaphor?</p>
+                                </div>
+                                <div id="english-card-2-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #991b1b;">Comparison with "Like" or "As"</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">Uses "like" or "as" to compare two different things</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Example:</strong> "Her smile was like sunshine" - compares smile to sunshine using "like"</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Difference:</strong> Simile uses comparison words, metaphor directly states the comparison</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Shakespeare (Hidden by default) -->
+                            <div id="english-card-3" style="display: none; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('english-card-3')">
+                                <div id="english-card-3-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Shakespeare Quote:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.1em; font-weight: bold; color: #dc2626;">"To be, or not to be..."</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">Which play?</p>
+                                </div>
+                                <div id="english-card-3-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #991b1b;">Hamlet (Act 3, Scene 1)</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">• Spoken by Hamlet, Prince of Denmark</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Contemplates life and death</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• One of literature's most famous soliloquies</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #1e293b;">• Written around 1600-1601</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 4: Grammar (Hidden by default) -->
+                            <div id="english-card-4" style="display: none; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('english-card-4')">
+                                <div id="english-card-4-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Grammar Rule:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.2em; font-weight: bold; color: #dc2626;">"i before e except after c"</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.9em; color: #64748b;">What does this mean?</p>
+                                </div>
+                                <div id="english-card-4-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #991b1b;">Spelling Rule</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">When 'i' and 'e' are together, 'i' usually comes before 'e'</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Examples:</strong> believe, receive, piece, friend</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Exception:</strong> After 'c', 'e' comes before 'i' (ceiling, receive)</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Another exception:</strong> "weird" doesn't follow the rule</p>
+                                </div>
+                            </div>
+
+                            <!-- Card 5: Vocabulary (Hidden by default) -->
+                            <div id="english-card-5" style="display: none; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; margin-bottom: 20px;" onclick="flipCard('english-card-5')">
+                                <div id="english-card-5-front" style="text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1e293b;">Vocabulary Word:</h4>
+                                    <p style="margin: 15px 0 0; font-size: 1.3em; font-weight: bold; color: #dc2626;">Ubiquitous</p>
+                                    <p style="margin: 5px 0 0; font-size: 1em; color: #64748b;">What does it mean?</p>
+                                </div>
+                                <div id="english-card-5-back" style="display: none; text-align: center;">
+                                    <h4 style="margin: 0; font-size: 1.1em; font-weight: bold; color: #991b1b;">Definition: Present Everywhere</h4>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;">Existing or being everywhere at the same time</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Origin:</strong> Latin "ubiquitas" meaning "everywhere"</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Synonyms:</strong> omnipresent, universal, commonplace</p>
+                                    <p style="margin: 10px 0 0; font-size: 1em; color: #1e293b;"><strong>Example:</strong> Smartphones have become ubiquitous in modern society</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Navigation -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                                <button onclick="previousCard('english')" style="padding: 4px 8px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Previous</button>
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick="markKnown('english')" style="padding: 4px 8px; background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #166534;">Know</button>
+                                    <button onclick="markUnknown('english')" style="padding: 4px 8px; background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500; color: #991b1b;">Unknown</button>
+                                </div>
+                                <button onclick="nextCard('english')" style="padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.65em; font-weight: 500;">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-course" class="page">
+                <div class="view-header">Course Content</div>
+                <div style="padding: 15px;">
+                    <!-- Course Header -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px; color: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h2 style="margin: 0; font-size: 1.2em; font-weight: bold;">Introduction to Psychology</h2>
+                            <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px; font-size: 0.7em;">PSYC 101</div>
+                        </div>
+                        <p style="margin: 0; font-size: 0.8em; opacity: 0.9;">Module 1: Foundations of Psychology</p>
+                        <div style="margin-top: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 0.7em;">Course Progress</span>
+                                <span style="font-size: 0.7em; font-weight: bold;">65%</span>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.3); height: 6px; border-radius: 3px; overflow: hidden;">
+                                <div style="background: white; height: 100%; width: 65%; border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Sections -->
+                    <h3 style="margin: 0 0 15px 0; font-size: 1em; font-weight: bold;">Course Modules</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Module 1 -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleModule(this, 'module1')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">🧠</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Module 1: Introduction</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">8 lessons • 2.5 hours</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.7em; color: #10b981; font-weight: bold;">100%</span>
+                                    <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                                </div>
+                            </div>
+                            <div id="module1" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('What is Psychology')">
+                                        <span style="font-size: 0.8em;">▶️</span>
+                                        <span style="font-size: 0.7em; flex: 1;">What is Psychology?</span>
+                                        <span style="font-size: 0.6em; color: #10b981;">✓</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('History of Psychology')">
+                                        <span style="font-size: 0.8em;">▶️</span>
+                                        <span style="font-size: 0.7em; flex: 1;">History of Psychology</span>
+                                        <span style="font-size: 0.6em; color: #10b981;">✓</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('Research Methods')">
+                                        <span style="font-size: 0.8em;">▶️</span>
+                                        <span style="font-size: 0.7em; flex: 1;">Research Methods</span>
+                                        <span style="font-size: 0.6em; color: #10b981;">✓</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module 2 -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleModule(this, 'module2')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">🔬</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Module 2: Biological Basis</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">10 lessons • 3 hours</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.7em; color: #f59e0b; font-weight: bold;">45%</span>
+                                    <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                                </div>
+                            </div>
+                            <div id="module2" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('Brain Structure')">
+                                        <span style="font-size: 0.8em;">▶️</span>
+                                        <span style="font-size: 0.7em; flex: 1;">Brain Structure</span>
+                                        <span style="font-size: 0.6em; color: #10b981;">✓</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('Neurotransmitters')">
+                                        <span style="font-size: 0.8em;">▶️</span>
+                                        <span style="font-size: 0.7em; flex: 1;">Neurotransmitters</span>
+                                        <span style="font-size: 0.6em; color: #64748b;">⏸</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('Nervous System')">
+                                        <span style="font-size: 0.8em;">🔒</span>
+                                        <span style="font-size: 0.7em; flex: 1;">Nervous System</span>
+                                        <span style="font-size: 0.6em; color: #94a3b8;">🔒</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module 3 -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;" onclick="toggleModule(this, 'module3')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: #dcfce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">💭</div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.9em; font-weight: bold;">Module 3: Cognitive Processes</h4>
+                                        <p style="margin: 3px 0 0; font-size: 0.6em; color: #64748b;">12 lessons • 4 hours</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.7em; color: #64748b; font-weight: bold;">0%</span>
+                                    <span style="font-size: 1.2em; color: #64748b;">▼</span>
+                                </div>
+                            </div>
+                            <div id="module3" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('Memory')">
+                                        <span style="font-size: 0.8em;">🔒</span>
+                                        <span style="font-size: 0.7em; flex: 1;">Memory</span>
+                                        <span style="font-size: 0.6em; color: #94a3b8;">🔒</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f8fafc; border-radius: 6px; cursor: pointer;" onclick="playLesson('Problem Solving')">
+                                        <span style="font-size: 0.8em;">🔒</span>
+                                        <span style="font-size: 0.7em; flex: 1;">Problem Solving</span>
+                                        <span style="font-size: 0.6em; color: #94a3b8;">🔒</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 12px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 0.9em; font-weight: bold;">Quick Actions</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button onclick="continueCourse()" style="padding: 10px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.7em; font-weight: bold; cursor: pointer;">Continue Learning</button>
+                            <button onclick="takeQuiz()" style="padding: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.7em; font-weight: bold; cursor: pointer;">Take Quiz</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-lessons" class="page">
+                <div class="view-header">Lessons</div>
+                <div style="padding: 15px; height: calc(100% - 65px); overflow: hidden; display: flex; flex-direction: column;">
+                    <!-- Course Cards - Horizontal Scroll -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+                        <div style="min-width: 140px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 15px; color: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;" onclick="goToLesson('math')">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; margin-bottom: 8px;">📐</div>
+                                <h4 style="margin: 0; font-size: 0.8em; font-weight: bold;">Mathematics</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; opacity: 0.9;">12 lessons</p>
+                            </div>
+                        </div>
+                        
+                        <div style="min-width: 140px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; padding: 15px; color: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;" onclick="goToLesson('science')">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; margin-bottom: 8px;">🔬</div>
+                                <h4 style="margin: 0; font-size: 0.8em; font-weight: bold;">Science</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; opacity: 0.9;">15 lessons</p>
+                            </div>
+                        </div>
+                        
+                        <div style="min-width: 140px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 12px; padding: 15px; color: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;" onclick="goToLesson('history')">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; margin-bottom: 8px;">📚</div>
+                                <h4 style="margin: 0; font-size: 0.8em; font-weight: bold;">History</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; opacity: 0.9;">8 lessons</p>
+                            </div>
+                        </div>
+                        
+                        <div style="min-width: 140px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 12px; padding: 15px; color: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;" onclick="goToLesson('english')">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; margin-bottom: 8px;">📝</div>
+                                <h4 style="margin: 0; font-size: 0.8em; font-weight: bold;">English</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; opacity: 0.9;">10 lessons</p>
+                            </div>
+                        </div>
+                        
+                        <div style="min-width: 140px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 12px; padding: 15px; color: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;" onclick="goToLesson('art')">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; margin-bottom: 8px;">🎨</div>
+                                <h4 style="margin: 0; font-size: 0.8em; font-weight: bold;">Art</h4>
+                                <p style="margin: 3px 0 0; font-size: 0.6em; opacity: 0.9;">6 lessons</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video and Notes Container -->
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 15px; overflow: hidden;">
+                        <!-- Video Section -->
+                        <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <h3 style="margin: 0 0 15px 0; font-size: 1em; font-weight: bold;">Featured Lesson</h3>
+                            <div style="background: #000; border-radius: 12px; height: 160px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;" onclick="playVideo()">
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.3)); border-radius: 12px;"></div>
+                                <div style="position: relative; z-index: 1; text-align: center; color: white;">
+                                    <div style="font-size: 3em; margin-bottom: 10px;">▶️</div>
+                                    <p style="margin: 0; font-size: 0.9em; font-weight: bold;">Introduction to Algebra</p>
+                                    <p style="margin: 5px 0 0; font-size: 0.7em; opacity: 0.9;">Mathematics • 15 min</p>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <h4 style="margin: 0 0 8px 0; font-size: 0.9em; font-weight: bold;">About this lesson</h4>
+                                <p style="margin: 0; font-size: 0.7em; color: #64748b; line-height: 1.4;">Learn the fundamentals of algebraic expressions and equations in this comprehensive introduction.</p>
+                                <div style="display: flex; gap: 10px; margin-top: 12px;">
+                                    <button onclick="playVideo()" style="flex: 1; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.7em; font-weight: bold; cursor: pointer;">Watch Now</button>
+                                    <button onclick="saveLesson()" style="padding: 8px 15px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.7em; font-weight: bold; cursor: pointer;">Save</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notepad Section -->
+                        <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex: 1; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h3 style="margin: 0; font-size: 1em; font-weight: bold;">📝 Notes</h3>
+                                <button onclick="clearNotes()" style="padding: 5px 10px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.6em; cursor: pointer;">Clear</button>
+                            </div>
+                            <textarea id="student-notes" placeholder="Take notes while watching the lesson..." style="flex: 1; width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.7em; line-height: 1.4; resize: none; outline: none; font-family: inherit;" oninput="saveNotes()"></textarea>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                <span style="font-size: 0.6em; color: #64748b;">Auto-saved</span>
+                                <button onclick="exportNotes()" style="padding: 5px 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 0.6em; cursor: pointer;">Export</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-no-cert" class="page">
+                <div class="no-data-screen">
+                    <div style="font-size: 4em; margin-bottom: 10px;">📜</div>
+                    <h3 style="color: #64748b;">No certificates earned yet</h3>
+                    <p style="font-size: 0.8em; color: #94a3b8; padding: 0 20px;">Complete your modules in the Learning Hub to earn official certificates.</p>
+                    <button onclick="go('page-growth', 'n-growth')" style="margin-top: 20px; padding: 10px 20px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer;">Back to Hub</button>
+                </div>
+            </div>
+
+            <div class="nav-bar" id="bottom-nav">
+                <div class="nav-item active" id="n-dash" onclick="go('page-dash', 'n-dash')">Dash</div>
+                <div class="nav-item" id="n-growth" onclick="go('page-growth', 'n-growth')">Growth</div>
+                <div class="nav-item" id="n-lessons" onclick="go('page-lessons', 'n-lessons')">Lessons</div>
+                <div class="nav-item" id="n-flashcards" onclick="go('page-flashcards-enhanced', 'n-flashcards')">Flashcards</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- PROTOTYPE LOGIC ---
+
+        // Login (Inside Phone)
+        function login() {
+            const user = document.getElementById('uIn').value || "Student User";
+            document.getElementById('display-name').innerText = user;
+            document.getElementById('name-edit').value = user;
+            
+            // Update profile tab with user name
+            document.querySelector('.profile-name').innerText = user;
+            
+            document.getElementById('page-login').classList.remove('active');
+            document.getElementById('page-grade-selection').classList.add('active');
+            
+            // Call navigation visibility update
+            setTimeout(updateNavigationVisibility, 10);
+        }
+
+        // Forgot Password Functions
+        function showForgotPassword() {
+            document.getElementById('forgotPasswordModal').style.display = 'flex';
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+            document.getElementById('resetEmail').value = '';
+        }
+
+        function sendResetLink() {
+            const email = document.getElementById('resetEmail').value;
+            
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            // Simulate sending reset link
+            alert(`Password reset link has been sent to ${email}\n\nPlease check your email and follow the instructions to reset your password.`);
+            
+            // Close modal after sending
+            closeForgotPassword();
+        }
+
+        // Navigation
+        function go(pId, nId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(pId).classList.add('active');
+            if(nId) document.getElementById(nId).classList.add('active');
+        }
+
+        // Dashboard Interaction
+        function updateGoal() {
+            const c = document.getElementById('dash-circle');
+            c.innerText = c.innerText === "60%" ? "100%" : "60%";
+            c.style.borderColor = c.innerText === "100%" ? "var(--science-color)" : "var(--primary)";
+        }
+
+        // Video function
+        function openVideo() {
+            window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+        }
+
+        // Flashcard navigation
+        function goToFlashcards() {
+            go('page-flashcards-enhanced');
+        }
+
+        let currentCard = {
+            math: 1,
+            science: 1,
+            history: 1,
+            english: 1
+        };
+
+        let totalCards = {
+            math: 5,
+            science: 6,
+            history: 4,
+            english: 5
+        };
+
+        // Show flashcards for specific subject
+        function showFlashcards(subject) {
+            // Hide all flashcard sections
+            document.getElementById('math-flashcards').style.display = 'none';
+            document.getElementById('science-flashcards').style.display = 'none';
+            document.getElementById('history-flashcards').style.display = 'none';
+            document.getElementById('english-flashcards').style.display = 'none';
+            
+            // Show selected subject flashcards
+            if (subject === 'math') {
+                document.getElementById('math-flashcards').style.display = 'block';
+            } else if (subject === 'science') {
+                document.getElementById('science-flashcards').style.display = 'block';
+            } else if (subject === 'history') {
+                document.getElementById('history-flashcards').style.display = 'block';
+            } else if (subject === 'english') {
+                document.getElementById('english-flashcards').style.display = 'block';
+            }
+        }
+
+        // Flip card to show answer
+        function flipCard(cardId) {
+            const front = document.getElementById(cardId + '-front');
+            const back = document.getElementById(cardId + '-back');
+            
+            if (front.style.display === 'none' || front.style.display === '') {
+                front.style.display = 'block';
+                back.style.display = 'none';
+            } else {
+                front.style.display = 'none';
+                back.style.display = 'block';
+            }
+        }
+
+        // Navigate to previous card
+        function previousCard(subject) {
+            if (currentCard[subject] > 1) {
+                currentCard[subject]--;
+                updateCardDisplay(subject);
+            }
+        }
+
+        // Navigate to next card
+        function nextCard(subject) {
+            if (currentCard[subject] < totalCards[subject]) {
+                currentCard[subject]++;
+                updateCardDisplay(subject);
+            }
+        }
+
+        // Mark card as known with visual feedback
+        function markKnown(subject) {
+            const currentCardElement = document.getElementById(`${subject}-card-${currentCard[subject]}`);
+            if (currentCardElement) {
+                currentCardElement.style.border = '2px solid #10b981';
+                currentCardElement.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.3)';
+            }
+            
+            // Auto advance to next card after a short delay
+            setTimeout(() => nextCard(subject), 500);
+        }
+
+        // Mark card as unknown with visual feedback
+        function markUnknown(subject) {
+            const currentCardElement = document.getElementById(`${subject}-card-${currentCard[subject]}`);
+            if (currentCardElement) {
+                currentCardElement.style.border = '2px solid #ef4444';
+                currentCardElement.style.boxShadow = '0 8px 20px rgba(239, 68, 68, 0.3)';
+            }
+            
+            // Auto advance to next card after a short delay
+            setTimeout(() => nextCard(subject), 500);
+        }
+
+        // Update card display with proper content switching
+        function updateCardDisplay(subject) {
+            // Hide all cards for this subject
+            for (let i = 1; i <= totalCards[subject]; i++) {
+                const card = document.getElementById(`${subject}-card-${i}`);
+                if (card) {
+                    card.style.display = 'none';
+                }
+            }
+            
+            // Show current card
+            const currentCardElement = document.getElementById(`${subject}-card-${currentCard[subject]}`);
+            if (currentCardElement) {
+                currentCardElement.style.display = 'flex';
+            }
+            
+            // Update card counter
+            const counter = document.getElementById(`${subject}-card-number`);
+            if (counter) {
+                counter.innerText = currentCard[subject];
+            }
+            
+            // Reset current card to front side
+            const front = document.getElementById(`${subject}-card-${currentCard[subject]}-front`);
+            const back = document.getElementById(`${subject}-card-${currentCard[subject]}-back`);
+            if (front && back) {
+                front.style.display = 'block';
+                back.style.display = 'none';
+            }
+        }
+
+        function startFlashcards(subject) {
+            // Navigate to enhanced flashcard page and show specific subject
+            go('page-flashcards-enhanced', 'n-flashcards');
+            
+            // Show the specific subject after a short delay to ensure page is loaded
+            setTimeout(() => {
+                showFlashcards(subject);
+            }, 100);
+        }
+
+        function showProgress(subject, icon, description, progress) {
+            // Update progress page with subject data
+            document.getElementById('subject-icon').innerText = icon;
+            document.getElementById('subject-name').innerText = subject.charAt(0).toUpperCase() + subject.slice(1);
+            document.getElementById('subject-description').innerText = description;
+            document.getElementById('progress-percentage').innerText = progress + '%';
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            // Navigate to progress page
+            go('page-progress');
+        }
+
+        // Growth Hub Interactions
+        function unlock(el) {
+            el.classList.toggle('active');
+        }
+
+        function showEmptyCert() {
+            go('page-no-cert');
+        }
+
+        // Profile Interactions
+        function syncName() {
+            const newName = document.getElementById('name-edit').value;
+            document.getElementById('display-name').innerText = newName;
+            // Also update profile tab
+            document.querySelector('.profile-name').innerText = newName;
+        }
+
+        // Grade Selection Function
+        function selectGrade(grade) {
+            // Store the selected grade level
+            localStorage.setItem('selectedGrade', grade);
+            
+            // Navigate to the main app with the selected grade
+            document.getElementById('page-grade-selection').classList.remove('active');
+            document.getElementById('page-dash').classList.add('active');
+            document.getElementById('n-dash').classList.add('active');
+            
+            // Show navigation and profile tab
+            setTimeout(updateNavigationVisibility, 10);
+        }
+
+        // Course page functions
+        function toggleModule(element, moduleId) {
+            const moduleContent = document.getElementById(moduleId);
+            const arrow = element.querySelector('span:last-child');
+            
+            if (moduleContent.style.display === 'none' || moduleContent.style.display === '') {
+                moduleContent.style.display = 'block';
+                arrow.innerText = '▲';
+            } else {
+                moduleContent.style.display = 'none';
+                arrow.innerText = '▼';
+            }
+        }
+
+        function playLesson(lessonName) {
+            alert(`Starting lesson: ${lessonName}\n\nThis would open the video player or lesson content for: ${lessonName}`);
+        }
+
+        function continueCourse() {
+            alert('Continuing from where you left off...\n\nThis would take you to your current lesson: "Neurotransmitters"');
+        }
+
+        function takeQuiz() {
+            alert('Starting Module 2 Quiz...\n\nThis would open the quiz interface for the Biological Basis module');
+        }
+
+        // Lessons page functions
+        function goToLesson(subject) {
+            alert(`Opening ${subject} lessons...\n\nThis would navigate to the detailed ${subject} lesson page with all available lessons and videos.`);
+            // In a real implementation, this would navigate to a subject-specific lesson page
+        }
+
+        function playVideo() {
+            alert('Starting video: "Introduction to Algebra"\n\nThis would open the video player for the featured lesson.');
+            // In a real implementation, this would open a video player
+        }
+
+        function saveLesson() {
+            alert('Lesson saved to your library!\n\nYou can access this lesson anytime from your saved items.');
+            // In a real implementation, this would save the lesson to user's library
+        }
+
+        // Notepad functions
+        function saveNotes() {
+            const notes = document.getElementById('student-notes').value;
+            localStorage.setItem('studentNotes', notes);
+            // In a real implementation, this would save to a database
+        }
+
+        function clearNotes() {
+            if (confirm('Are you sure you want to clear all notes?')) {
+                document.getElementById('student-notes').value = '';
+                localStorage.removeItem('studentNotes');
+            }
+        }
+
+        function exportNotes() {
+            const notes = document.getElementById('student-notes').value;
+            if (!notes.trim()) {
+                alert('No notes to export!');
+                return;
+            }
+            
+            // Create a downloadable text file
+            const blob = new Blob([notes], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lesson-notes.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Load saved notes when page loads
+        window.addEventListener('load', function() {
+            const savedNotes = localStorage.getItem('studentNotes');
+            if (savedNotes) {
+                document.getElementById('student-notes').value = savedNotes;
+            }
+        });
+
+        // Clock Logic
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours();
+            let m = now.getMinutes();
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            m = m < 10 ? '0' + m : m;
+            document.getElementById('clock').innerText = h + ":" + m + " " + ampm;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

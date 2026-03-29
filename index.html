@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Flow - Complete Learning System</title>
+    <style>
+        /* --- COMPREHENSIVE CSS STYLING --- */
+        :root {
+            --phone-shell: #1a1a1a;
+            --screen-bg: #f1f5f9;
+            --primary: #3b82f6;
+            --math-color: #FF6B6B;
+            --science-color: #10b981;
+            --history-color: #8b5cf6;
+            --english-color: #06b6d4;
+            --art-color: #f59e0b;
+            --text-dark: #1e293b;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-secondary: #64748b;
+            --dark-bg: #0a0a0a;
+            --dark-text: #b0b0b0;
+            --cyan: #00FFFF;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            margin: 0; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Navigation */
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--cyan);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+        }
+
+        /* Page Management */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grade Selection Grid */
+        .grade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .grade-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+
+        .grade-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .grade-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .grade-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .grade-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Subject Cards */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .subject-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--cyan));
+        }
+
+        .subject-card.math::before { background: var(--math-color); }
+        .subject-card.science::before { background: var(--science-color); }
+        .subject-card.history::before { background: var(--history-color); }
+        .subject-card.english::before { background: var(--english-color); }
+
+        .subject-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .subject-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .subject-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .subject-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .subject-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Flashcard System */
+        .flashcard-container {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .flashcard {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            min-height: 300px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard:hover {
+            transform: scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            top: 0;
+            left: 0;
+            padding: 2rem;
+            border-radius: 16px;
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-content {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--science-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--math-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Progress Tracker */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Study Tree */
+        .tree-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .tree-item {
+            margin: 1rem 0;
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .tree-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .tree-header:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .tree-content {
+            margin-top: 1rem;
+            padding-left: 1rem;
+            display: none;
+        }
+
+        .tree-content.expanded {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .grade-grid, .subject-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-container {
+                padding: 0 1rem;
+            }
+
+            .flashcard-controls {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 255, 255, 0.3);
+            border-top: 4px solid var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">📚 Study Flow</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#" onclick="showPage('home')" class="nav-link active">Home</a></li>
+                    <li><a href="#" onclick="showPage('grades')" class="nav-link">Grades</a></li>
+                    <li><a href="#" onclick="showPage('subjects')" class="nav-link">Subjects</a></li>
+                    <li><a href="#" onclick="showPage('flashcards')" class="nav-link">Flashcards</a></li>
+                    <li><a href="#" onclick="showPage('progress')" class="nav-link">Progress</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="progress-container">
+                <div class="progress-header">
+                    <h1 class="progress-title">Welcome to Study Flow</h1>
+                </div>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+                    Your comprehensive learning platform with interactive flashcards, progress tracking, and personalized study tools.
+                </p>
+                <div style="text-align: center;">
+                    <button class="btn btn-primary" onclick="showPage('grades')" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                        Start Learning 🚀
+                    </button>
+                </div>
+            </div>
+
+            <div class="progress-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCards">0</div>
+                    <div class="stat-label">Total Flashcards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="studiedToday">0</div>
+                    <div class="stat-label">Studied Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="mastered">0</div>
+                    <div class="stat-label">Mastered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="streak">0</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Selection Page -->
+        <div id="grades" class="page">
+            <div class="progress-container">
+                <h1 class="progress-title">Select Your Grade Level</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Choose your grade to access appropriate learning materials.</p>
+            </div>
+
+            <div class="grade-grid">
+                <div class="grade-card" onclick="selectGrade('elementary')">
+                    <div class="grade-icon">🎒</div>
+                    <div class="grade-title">Elementary</div>
+                    <div class="grade-description">Grades 1-5: Basic concepts and foundations</div>
+                </div>
+                <div class="grade-card" onclick="selectGrade('middle')">
+                    <div class="grade-icon">📚</div>
+                    <div class="grade-title">Middle School</div>
+                    <div class="grade-description">Grades 6-8: Intermediate topics and skills</div>
+                </div>
+                <div class="grade-card" onclick="selectGrade('high')">
+                    <div class="grade-icon">🎓</div>
+                    <div class="grade-title">High School</div>
+                    <div class="grade-description">Grades 9-12: Advanced concepts and preparation</div>
+                </div>
+                <div class="grade-card" onclick="selectGrade('college')">
+                    <div class="grade-icon">🏫</div>
+                    <div class="grade-title">College</div>
+                    <div class="grade-description">Higher education: Specialized subjects</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Page -->
+        <div id="subjects" class="page">
+            <div class="progress-container">
+                <h1 class="progress-title">Choose Your Subject</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Select a subject to start learning with flashcards.</p>
+            </div>
+
+            <div class="subject-grid">
+                <div class="subject-card math" onclick="selectSubject('math')">
+                    <div class="subject-icon">🔢</div>
+                    <div class="subject-title">Mathematics</div>
+                    <div class="subject-description">Algebra, Geometry, Calculus, and more</div>
+                    <div class="subject-stats">
+                        <span>📊 25 cards</span>
+                        <span>⭐ 85% mastered</span>
+                    </div>
+                </div>
+                <div class="subject-card science" onclick="selectSubject('science')">
+                    <div class="subject-icon">🔬</div>
+                    <div class="subject-title">Science</div>
+                    <div class="subject-description">Physics, Chemistry, Biology concepts</div>
+                    <div class="subject-stats">
+                        <span>📊 30 cards</span>
+                        <span>⭐ 72% mastered</span>
+                    </div>
+                </div>
+                <div class="subject-card history" onclick="selectSubject('history')">
+                    <div class="subject-icon">📜</div>
+                    <div class="subject-title">History</div>
+                    <div class="subject-description">World History, Civilizations, Events</div>
+                    <div class="subject-stats">
+                        <span>📊 20 cards</span>
+                        <span>⭐ 68% mastered</span>
+                    </div>
+                </div>
+                <div class="subject-card english" onclick="selectSubject('english')">
+                    <div class="subject-icon">📖</div>
+                    <div class="subject-title">English</div>
+                    <div class="subject-description">Grammar, Literature, Vocabulary</div>
+                    <div class="subject-stats">
+                        <span>📊 28 cards</span>
+                        <span>⭐ 91% mastered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flashcards Page -->
+        <div id="flashcards" class="page">
+            <div class="flashcard-container">
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <h2 id="subjectTitle" class="progress-title">Select a Subject</h2>
+                        <div style="color: var(--text-secondary);">
+                            <span id="cardCounter">No cards loaded</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="flashcardArea">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <div id="flashcardControls" style="display: none;">
+                    <div class="flashcard-controls">
+                        <button class="btn btn-secondary" onclick="previousCard()">← Previous</button>
+                        <button class="btn btn-primary" onclick="flipCard()">Flip Card</button>
+                        <button class="btn btn-success" onclick="markKnown()">✓ Known</button>
+                        <button class="btn btn-danger" onclick="markUnknown()">✗ Review</button>
+                        <button class="btn btn-secondary" onclick="nextCard()">Next →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Page -->
+        <div id="progress" class="page">
+            <div class="progress-container">
+                <h1 class="progress-title">Your Learning Progress</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Track your learning journey and achievements.</p>
+            </div>
+
+            <div class="progress-stats">
+                <div class="stat-card">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Total Cards Studied</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">89</div>
+                    <div class="stat-label">Cards Mastered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.2</div>
+                    <div class="stat-label">Hours Studied</div>
+                </div>
+            </div>
+
+            <div class="tree-container">
+                <h2 style="margin-bottom: 1.5rem;">Subject Progress</h2>
+                
+                <div class="tree-item">
+                    <div class="tree-header" onclick="toggleTree('mathProgress')">
+                        <span>🔢 Mathematics</span>
+                        <span>85% Complete</span>
+                    </div>
+                    <div id="mathProgress" class="tree-content expanded">
+                        <p>Algebra: 90% mastered</p>
+                        <p>Geometry: 82% mastered</p>
+                        <p>Calculus: 78% mastered</p>
+                    </div>
+                </div>
+
+                <div class="tree-item">
+                    <div class="tree-header" onclick="toggleTree('scienceProgress')">
+                        <span>🔬 Science</span>
+                        <span>72% Complete</span>
+                    </div>
+                    <div id="scienceProgress" class="tree-content">
+                        <p>Physics: 68% mastered</p>
+                        <p>Chemistry: 75% mastered</p>
+                        <p>Biology: 73% mastered</p>
+                    </div>
+                </div>
+
+                <div class="tree-item">
+                    <div class="tree-header" onclick="toggleTree('historyProgress')">
+                        <span>📜 History</span>
+                        <span>68% Complete</span>
+                    </div>
+                    <div id="historyProgress" class="tree-content">
+                        <p>World History: 70% mastered</p>
+                        <p>American History: 65% mastered</p>
+                        <p>Ancient Civilizations: 69% mastered</p>
+                    </div>
+                </div>
+
+                <div class="tree-item">
+                    <div class="tree-header" onclick="toggleTree('englishProgress')">
+                        <span>📖 English</span>
+                        <span>91% Complete</span>
+                    </div>
+                    <div id="englishProgress" class="tree-content">
+                        <p>Grammar: 95% mastered</p>
+                        <p>Vocabulary: 88% mastered</p>
+                        <p>Literature: 90% mastered</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- COMPREHENSIVE JAVASCRIPT FUNCTIONALITY ---
+
+        // Global State Management
+        let currentState = {
+            currentPage: 'home',
+            selectedGrade: null,
+            selectedSubject: null,
+            currentCard: {
+                math: 1,
+                science: 1,
+                history: 1,
+                english: 1
+            },
+            totalCards: {
+                math: 25,
+                science: 30,
+                history: 20,
+                english: 28
+            },
+            isFlipped: false,
+            studiedToday: 0,
+            mastered: 89,
+            streak: 12
+        };
+
+        // Flashcard Data
+        const flashcardData = {
+            math: [
+                { question: "What is the Pythagorean theorem?", answer: "a² + b² = c²" },
+                { question: "What is the derivative of x²?", answer: "2x" },
+                { question: "What is the integral of 1/x?", answer: "ln|x| + C" },
+                { question: "What is sin²θ + cos²θ?", answer: "1" },
+                { question: "What is the quadratic formula?", answer: "x = (-b ± √(b²-4ac)) / 2a" }
+            ],
+            science: [
+                { question: "What is Newton's First Law?", answer: "An object at rest stays at rest, an object in motion stays in motion unless acted upon by an external force" },
+                { question: "What is the chemical formula for water?", answer: "H₂O" },
+                { question: "What is photosynthesis?", answer: "The process by which plants convert light energy into chemical energy" },
+                { question: "What is DNA?", answer: "Deoxyribonucleic acid, the molecule that carries genetic information" },
+                { question: "What is the speed of light?", answer: "299,792,458 meters per second" }
+            ],
+            history: [
+                { question: "When did World War II end?", answer: "1945" },
+                { question: "Who was the first President of the United States?", answer: "George Washington" },
+                { question: "When did the Roman Empire fall?", answer: "476 AD (Western Roman Empire)" },
+                { question: "Who wrote the Declaration of Independence?", answer: "Thomas Jefferson" },
+                { question: "When did the Renaissance begin?", answer: "14th century" }
+            ],
+            english: [
+                { question: "What is a noun?", answer: "A word that represents a person, place, thing, or idea" },
+                { question: "What is the difference between 'their' and 'there'?", answer: "'Their' shows possession, 'there' indicates location" },
+                { question: "What is a metaphor?", answer: "A figure of speech that directly compares two unlike things" },
+                { question: "What is the past tense of 'go'?", answer: "Went" },
+                { question: "What is a thesis statement?", answer: "The main argument or claim of an essay" }
+            ]
+        };
+
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentState.currentPage = pageId;
+            
+            // Update stats when showing home page
+            if (pageId === 'home') {
+                updateStats();
+            }
+        }
+
+        // Grade Selection
+        function selectGrade(grade) {
+            currentState.selectedGrade = grade;
+            showPage('subjects');
+        }
+
+        // Subject Selection
+        function selectSubject(subject) {
+            currentState.selectedSubject = subject;
+            currentState.currentCard[subject] = 1;
+            currentState.isFlipped = false;
+            showPage('flashcards');
+            loadFlashcards(subject);
+        }
+
+        // Flashcard Functions
+        function loadFlashcards(subject) {
+            const flashcardArea = document.getElementById('flashcardArea');
+            const subjectTitle = document.getElementById('subjectTitle');
+            const cardCounter = document.getElementById('cardCounter');
+            const controls = document.getElementById('flashcardControls');
+            
+            // Update title
+            const subjectNames = {
+                math: 'Mathematics',
+                science: 'Science',
+                history: 'History',
+                english: 'English'
+            };
+            subjectTitle.textContent = subjectNames[subject];
+            
+            // Update counter
+            cardCounter.textContent = `Card ${currentState.currentCard[subject]} of ${currentState.totalCards[subject]}`;
+            
+            // Load current card
+            const currentCardData = flashcardData[subject][currentState.currentCard[subject] - 1];
+            
+            flashcardArea.innerHTML = `
+                <div class="flashcard" id="mainFlashcard" onclick="flipCard()">
+                    <div class="flashcard-front">
+                        <div class="flashcard-content">${currentCardData.question}</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            Click to flip →
+                        </div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-content">${currentCardData.answer}</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                            ← Click to flip back
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Show controls
+            controls.style.display = 'block';
+            
+            // Reset flip state
+            const flashcard = document.getElementById('mainFlashcard');
+            flashcard.classList.remove('flipped');
+            currentState.isFlipped = false;
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('mainFlashcard');
+            if (flashcard) {
+                currentState.isFlipped = !currentState.isFlipped;
+                if (currentState.isFlipped) {
+                    flashcard.classList.add('flipped');
+                } else {
+                    flashcard.classList.remove('flipped');
+                }
+            }
+        }
+
+        function previousCard() {
+            const subject = currentState.selectedSubject;
+            if (currentState.currentCard[subject] > 1) {
+                currentState.currentCard[subject]--;
+                loadFlashcards(subject);
+            }
+        }
+
+        function nextCard() {
+            const subject = currentState.selectedSubject;
+            if (currentState.currentCard[subject] < flashcardData[subject].length) {
+                currentState.currentCard[subject]++;
+                loadFlashcards(subject);
+            } else {
+                alert('You have completed all cards in this subject!');
+                showPage('subjects');
+            }
+        }
+
+        function markKnown() {
+            const subject = currentState.selectedSubject;
+            currentState.mastered++;
+            currentState.studiedToday++;
+            alert('Great job! Card marked as known.');
+            nextCard();
+        }
+
+        function markUnknown() {
+            const subject = currentState.selectedSubject;
+            currentState.studiedToday++;
+            alert('Card marked for review. Keep practicing!');
+            nextCard();
+        }
+
+        // Progress Tree Toggle
+        function toggleTree(treeId) {
+            const treeContent = document.getElementById(treeId);
+            if (treeContent) {
+                treeContent.classList.toggle('expanded');
+            }
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const totalCardsElement = document.getElementById('totalCards');
+            const studiedTodayElement = document.getElementById('studiedToday');
+            const masteredElement = document.getElementById('mastered');
+            const streakElement = document.getElementById('streak');
+            
+            if (totalCardsElement) totalCardsElement.textContent = '103';
+            if (studiedTodayElement) studiedTodayElement.textContent = currentState.studiedToday;
+            if (masteredElement) masteredElement.textContent = currentState.mastered;
+            if (streakElement) streakElement.textContent = currentState.streak;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Add keyboard navigation for flashcards
+            document.addEventListener('keydown', function(e) {
+                if (currentState.currentPage === 'flashcards') {
+                    switch(e.key) {
+                        case ' ':
+                        case 'Enter':
+                            e.preventDefault();
+                            flipCard();
+                            break;
+                        case 'ArrowLeft':
+                            previousCard();
+                            break;
+                        case 'ArrowRight':
+                            nextCard();
+                            break;
+                        case '1':
+                            markKnown();
+                            break;
+                        case '2':
+                            markUnknown();
+                            break;
+                    }
+                }
+            });
+        });
+
+        // Local Storage Integration
+        function saveProgress() {
+            localStorage.setItem('studyFlowProgress', JSON.stringify(currentState));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('studyFlowProgress');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                Object.assign(currentState, savedState);
+            }
+        }
+
+        // Auto-save progress
+        setInterval(saveProgress, 30000); // Save every 30 seconds
+        
+        // Load progress on startup
+        loadProgress();
+    </script>
+</body>
+</html>
